@@ -22,6 +22,8 @@ Spree::UserSessionsController.class_eval do
     unless @user.valid_password?(password)
       logger.info("User #{email} failed signin, password \"#{password}\" is invalid")
       render json: { error: t('devise.failure.invalid') }, status: :unprocessable_entity
+    else
+      render json: { token: @user.spree_api_key}, status: 200
     end
   end
 end
