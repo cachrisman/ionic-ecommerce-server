@@ -16,7 +16,7 @@ Spree::UserSessionsController.class_eval do
 
     if @user.nil?
       logger.info("User #{email} failed signin, user cannot be found.")
-      render  json: { error: "Invalid email or passoword."}, status: 401 and return
+      render  json: { error: "Invalid email or password."}, status: 401 and return
     end
 
     unless @user.valid_password?(password)
