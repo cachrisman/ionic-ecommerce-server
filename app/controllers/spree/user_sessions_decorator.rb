@@ -6,17 +6,17 @@ Spree::UserSessionsController.class_eval do
     email = params[:email]
     password = params[:password]
     if request.format != :json
-      render json: { message: "The request must be json"}, status: 406 and return
+      render json: { error: "The request must be json"}, status: 406 and return
     end
     if email.nil? or password.nil?
-      render json: { message: "The request must contain the user email and password."}, status: 400 and return
+      render json: { error: "The request must contain the user email and password."}, status: 400 and return
     end
 
     @user=Spree::User.find_by_email(email.downcase)
 
     if @user.nil?
       logger.info("User #{email} failed signin, user cannot be found.")
-      render  json: { message: "Invalid email or passoword."}, status: 401 and return
+      render  json: { error: "Invalid email or password."}, status: 401 and return
     end
 
     unless @user.valid_password?(password)
