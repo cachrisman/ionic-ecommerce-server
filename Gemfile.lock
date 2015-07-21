@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/spree/deface.git
+  revision: f0e9c7cafb83bc935c7363f064e712deeca8c051
+  specs:
+    deface (1.0.0)
+      colorize (>= 0.5.8)
+      nokogiri (~> 1.6.0)
+      polyglot
+      rails (>= 3.1)
+
+GIT
   remote: git://github.com/spree/spree_auth_devise.git
   revision: b554f307e5aa887110a70d54f8967c284f881375
   branch: 3-0-stable
@@ -70,6 +80,11 @@ GEM
       json
     awesome_nested_set (3.0.2)
       activerecord (>= 4.0.0, < 5)
+    aws-sdk (1.64.0)
+      aws-sdk-v1 (= 1.64.0)
+    aws-sdk-v1 (1.64.0)
+      json (~> 1.4)
+      nokogiri (>= 1.4.4)
     bcrypt (3.1.10)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
@@ -102,11 +117,6 @@ GEM
     css_parser (1.3.6)
       addressable
     debug_inspector (0.0.2)
-    deface (1.0.1)
-      colorize (>= 0.5.8)
-      nokogiri (~> 1.6.0)
-      polyglot
-      rails (>= 3.1)
     devise (3.4.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -116,6 +126,10 @@ GEM
       warden (~> 1.2.3)
     devise-encryptable (0.1.2)
       devise (>= 2.1.0)
+    dotenv (2.0.2)
+    dotenv-rails (2.0.2)
+      dotenv (= 2.0.2)
+      railties (~> 4.0)
     erubis (2.7.0)
     execjs (2.5.2)
     ffaker (1.32.1)
@@ -341,8 +355,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  aws-sdk
   byebug
   coffee-rails (~> 4.1.0)
+  deface!
+  dotenv-rails
   jbuilder (~> 2.0)
   jquery-rails
   pg

@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-
+ruby "2.2.2"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.3'
@@ -43,15 +43,19 @@ group :development, :test do
   gem 'spring'
 
   gem 'quiet_assets'
-end
 
+  gem 'dotenv-rails'
+end
 
 gem 'spree', '3.0.1'
 gem 'spree_gateway', github: 'spree/spree_gateway', branch: '3-0-stable'
 gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '3-0-stable'
+gem 'deface', github: 'spree/deface'
 
 gem 'rack-cors', :require => 'rack/cors'
 
 gem 'rails_12factor', group: :production
 gem 'puma'
-ruby "2.2.2"
+
+gem 'aws-sdk'
+
