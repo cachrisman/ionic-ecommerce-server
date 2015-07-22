@@ -15,6 +15,16 @@ $assertive:                       #ef473a !default;
 $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
+.item.item-body.featured {
+  padding: 0;
+  height: 181px; }
+
+.featured > .slider > .slider-pager {
+  height: 12px; }
+
+.slider {
+  height: 180px; }
+
 .cart-item-text {
   padding-left: 20px; }
 
