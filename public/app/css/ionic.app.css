@@ -19,6 +19,9 @@ $dark:                            #444 !default;
   padding: 0;
   height: 181px; }
 
+img.featured {
+  height: 140px; }
+
 .featured > .slider > .slider-pager {
   height: 12px; }
 

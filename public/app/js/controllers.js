@@ -20,26 +20,42 @@ function TabCtrl(   $scope,   CartService,   CONFIG) {
 }
 
 // Home Controller
-HomeCtrl.$inject = ['ProductService', 'CartService', 'CONFIG', '$ionicSlideBoxDelegate', '$timeout'];
-function HomeCtrl(   ProductService,   CartService,   CONFIG,   $ionicSlideBoxDelegate,   $timeout) {
-  var vm = this;
+HomeCtrl.$inject = ['ProductService', 'CartService', 'CONFIG', '$scope', '$state', '$ionicPopup', '$ionicSlideBoxDelegate', '$timeout'];
+function HomeCtrl(   ProductService,   CartService,   CONFIG,   $scope,   $state,   $ionicPopup,   $ionicSlideBoxDelegate,   $timeout) {
+  var vm = this,
+      cacheLoaded = false;
+
+  vm.show_featured = false;
   vm.addedToCart = false;
   vm.addToCart = addToCart;
   vm.messages = CONFIG.home;
 
-  ProductService.all()
-    .then(function(response){
-      vm.featured = response.products;
-      for (var key in vm.featured) {
-        var product = vm.featured[key];
-        product.home_image = CONFIG.image_root + product.master.images[0].small_url;
-
-      }
-      $ionicSlideBoxDelegate.update();
-    },
-    function(rejection) {
-      console.log("HomeCtrl Products.all error: " + rejection.error);
-    });
+  $scope.$on('$ionicView.enter', function(e) {
+    if (!cacheLoaded) {
+      ProductService.all(cacheLoaded)
+      .then(function(data){
+        cacheLoaded = true;
+        vm.show_featured = true;
+        vm.featured = data.response.products;
+        for (var key in vm.featured) {
+          var product = vm.featured[key];
+          product.home_image = CONFIG.image_root + product.master.images[0].product_url;
+        }
+        $ionicSlideBoxDelegate.update();
+      },
+      function(data) {
+        var popup = $ionicPopup.confirm({
+          title: 'Error!',
+          template: 'Error retrieving products: ' + data.status + '<br>Try Again?',
+          cancelText: 'No',
+          okText: 'Yes'
+        });
+        popup.then(function(res){
+          if (res) {$state.reload();}
+        });
+      });
+    }
+  });
 
     function addToCart(product, $event) {
       $event.stopPropagation();
@@ -55,64 +71,59 @@ function ProductsCtrl(   $state,   $ionicLoading,   $ionicPopup,   AuthService, 
   var vm = this;
   vm.messages = CONFIG.products;
 
-  if (!AuthService.isAuthenticated()) {
-    var popup = $ionicPopup.alert({
-      title: 'Not Authenticated!',
-      template: 'Please login in first'
-    });
-    popup.then(function(){$state.go('login');});
-  } else {
-    $ionicLoading.show();
-    ProductService.all()
-    .then(function(response) {
-        vm.all = response.products;
-        for (var key in vm.all) {
-          var product = vm.all[key];
-          product.image = CONFIG.image_root + product.master.images[0].mini_url;
-        }
-        $ionicLoading.hide();
-      },
-      function(rejection) {
-        console.log("ProductsCtrl Products.all error: " + rejection.error);
+  $ionicLoading.show();
+  ProductService.all()
+  .then(function(data) {
+      vm.all = data.response.products;
+      for (var key in vm.all) {
+        var product = vm.all[key];
+        product.image = CONFIG.image_root + product.master.images[0].mini_url;
+      }
+      $ionicLoading.hide();
+    },
+    function(data) {
+      console.log("ProductsCtrl Products.all error: " + data.rejection.error);
+      var popup = $ionicPopup.alert({
+        title: 'Error!',
+        template: 'Error retrieving products: ' + data.rejection.error
       });
-  }
+      popup.then(function(){
+        $ionicLoading.hide();
+        $state.go('home');
+      });
+    });
 }
 
 // Product Detail Controller
 ProductDetailCtrl.$inject = ['$stateParams', '$state', '$ionicLoading', '$ionicPopup', '$timeout', 'CONFIG', 'AuthService', 'ProductService', 'CartService', ];
-function ProductDetailCtrl(   $stateParams,   $state,   $ionicLoading,   $ionicPopup,   $timeout,CONFIG,   AuthService,   ProductService,   CartService) {
+function ProductDetailCtrl(   $stateParams,   $state,   $ionicLoading,   $ionicPopup,   $timeout,   CONFIG,   AuthService,   ProductService,   CartService) {
   var vm = this;
   vm.messages = CONFIG.product;
   vm.addedToCart = false;
   var slug = $stateParams.slug;
   vm.addToCart = addToCart;
 
-  if (!AuthService.isAuthenticated()) {
-    var popup = $ionicPopup.alert({
-      title: 'Not Authenticated!',
-      template: 'Please login in first'
-    });
-    popup.then(function(){$state.go('login');});
-  } else {
-    $ionicLoading.show();
-    ProductService.get(slug)
-    .then(function(response) {
-        vm.name = response.name;
-        vm.price = response.price;
-        vm.description = response.description;
-        vm.image = CONFIG.image_root + response.master.images[0].product_url;
-        vm.product = response;
-        $ionicLoading.hide();
-      },
-      function(rejection) {
-        $ionicLoading.hide();
-        var popup = $ionicPopup.alert({
-          title: 'Error!',
-          template: rejection.error
-        });
-        popup.then(function(){$state.go('products');});
+  $ionicLoading.show();
+  ProductService.get(slug)
+  .then(function(data) {
+      vm.name = data.response.name;
+      vm.price = data.response.price;
+      vm.description = data.response.description;
+      vm.image = CONFIG.image_root + data.response.master.images[0].product_url;
+      vm.product = data.response;
+      $ionicLoading.hide();
+    },
+    function(data) {
+      console.log("ProductDetailCtrl Products.get error: " + data.rejection.error);
+      var popup = $ionicPopup.alert({
+        title: 'Error!',
+        template: 'Error retrieving product: ' + data.rejection.error
       });
-  }
+      popup.then(function() {
+        $ionicLoading.hide();
+        $state.go('products');
+      });
+    });
 
   function addToCart(product) {
     CartService.add(product);
@@ -175,11 +186,13 @@ LoginCtrl.$inject = ['$state', '$ionicLoading', '$ionicPopup', 'AuthService', 'C
 function LoginCtrl(   $state,   $ionicLoading,   $ionicPopup,   AuthService,   CONFIG) {
   var vm = this;
   vm.messages = CONFIG.login;
+  vm.user = {};
+  vm.user.email = "demo@demo.com";
+  vm.user.password = "demodemo";
   vm.go = go;
 
   function go(user) {
     $ionicLoading.show();
-    vm.user = null;
     AuthService.login(user.email, user.password)
       .success(function(data) {
         console.log("successful login; token: " + data.token);

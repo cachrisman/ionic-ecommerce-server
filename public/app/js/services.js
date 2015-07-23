@@ -85,19 +85,21 @@ function ProductService($http, $q, AuthService, CONFIG) {
   service.all = all;
   service.get = get;
 
-  function all() {
-    return httpRequestHandler(service.endpoint);
+  function all(cache) {
+    return httpRequestHandler(service.endpoint, cache);
   }
 
-  function get(slug) {
-    return httpRequestHandler(service.endpoint + "/" + slug);
+  function get(slug, cache) {
+    return httpRequestHandler(service.endpoint + "/" + slug, cache);
   }
 
-  function httpRequestHandler(url) {
+  function httpRequestHandler(url, cache) {
     var timedOut = false,
         timeout = $q.defer(),
         result = $q.defer(),
         httpRequest;
+
+    cache = (typeof cache === 'undefined') ? true : cache;
 
     setTimeout(function () {
       timedOut = true;
@@ -107,23 +109,28 @@ function ProductService($http, $q, AuthService, CONFIG) {
     httpRequest = $http({
       method: 'get',
       url: url,
-      cache: true,
+      cache: cache,
       timeout: timeout.promise
     });
 
-    httpRequest.success(function(response) {
-        result.resolve(response);
-      });
-
-    httpRequest.error(function(rejection) {
-      if (timedOut) {
-        result.reject({
-          error: 'Request took longer than ' + CONFIG.timeout + ' seconds.'
-        });
-      } else {
-        result.reject(rejection);
-      }
+    httpRequest.success(function(response, status, headers, config) {
+      var data = {};
+      data.response = response;
+      data.status = status;
+      data.headers = headers;
+      data.config = config;
+      result.resolve(data);
     });
+
+    httpRequest.error(function(rejection, status, headers, config) {
+      var data = {};
+      data.status = status;
+      data.headers = headers;
+      data.config = config;
+      data.rejection = timedOut ? 'Request took longer than ' + CONFIG.timeout + ' seconds.' : rejection;
+      result.reject(data);
+    });
+
     return result.promise;
   }
   return service;

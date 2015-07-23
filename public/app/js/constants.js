@@ -29,7 +29,7 @@ angular.module('ionic-ecommerce')
   },
   home: {
     title: "Home",
-    welcome: "Welcome to Ionic Ecommerce",
+    welcome: "Welcome to Ionic e-Commerce",
     featured_products: "Featured Products",
     add_to_cart: "Add to Cart",
     added_to_cart: "Product added!",
@@ -44,7 +44,7 @@ angular.module('ionic-ecommerce')
     added_to_cart: "Product added!!",
   },
   cart: {
-    title: "Product Detail",
+    title: "Cart",
     empty_cart: "Your Cart is Empty!",
     remove_from_cart: "Remove",
     total: "Total",
